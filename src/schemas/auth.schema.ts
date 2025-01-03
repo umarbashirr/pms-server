@@ -19,3 +19,17 @@ export const RegisterSchema = z.object({
       message: "Password should be maximum 30 characters!",
     }),
 });
+
+export const LoginSchema = z.object({
+  email: z.string().email({
+    message: "Invalid email",
+  }),
+  password: z
+    .string()
+    .min(8, {
+      message: "Password should be minimum 08 characters!",
+    })
+    .max(30, {
+      message: "Password should be maximum 30 characters!",
+    }),
+});

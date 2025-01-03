@@ -1,6 +1,7 @@
 import { Document, model, Model, Schema } from "mongoose";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
+import jwt from "jsonwebtoken";
 
 import { GlobalRoleEnum } from "../enums/global-role.enum";
 
@@ -20,9 +21,13 @@ interface IMethods {
   comparePassword: (password: string) => Promise<boolean>;
   getResetPasswordToken: () => string;
   getEmailVerifyToken: () => string;
+  getAccessToken: () => string;
 }
 
-const UserSchema = new Schema<IUser, Model<IUser, IMethods>>(
+// Combine IUser and IMethods into a single type
+type UserModel = Model<IUser, {}, IMethods>;
+
+const UserSchema = new Schema<IUser, UserModel>(
   {
     name: {
       type: String,
@@ -70,8 +75,14 @@ UserSchema.pre("save", async function (next) {
 });
 
 // Comparing Password coming from Frontend
-UserSchema.method("comparePassword", function (password: string) {
-  return bcrypt.compare(password, this.password);
+UserSchema.method("comparePassword", async function (password: string) {
+  return await bcrypt.compare(password, this.password);
+});
+
+UserSchema.method("getAccessToken", async function () {
+  return await jwt.sign({ _id: this._id }, process.env.JWT_ACCESS_SECRET!, {
+    expiresIn: process.env.JWT_ACCESS_EXPIRES_IN,
+  });
 });
 
 // Generating Password Reset Token
@@ -87,6 +98,6 @@ UserSchema.method("getEmailVerifyToken", function () {
   return emailToken;
 });
 
-const User = model<IUser, Model<IUser, IMethods>>("User", UserSchema);
+const User = model<IUser, UserModel>("User", UserSchema);
 
 export default User;

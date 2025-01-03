@@ -1,19 +1,26 @@
 import User from "../models/user.model";
 
 // Find user by email
-const findUserByEmail = async (email: string) => {
+export const findUserByEmail = async (email: string) => {
   return await User.findOne({
     email,
   });
 };
 
+// Find user by email
+export const findUserByEmailWithPassword = async (email: string) => {
+  return await User.findOne({
+    email,
+  }).select("password");
+};
+
 // Find user by id
-const findUserById = async (id: string) => {
+export const findUserById = async (id: string) => {
   return await User.findById(id);
 };
 
 // Create new user
-const createNewUser = async ({
+export const createNewUser = async ({
   name,
   email,
   phoneNumber,
@@ -41,5 +48,3 @@ const createNewUser = async ({
     role: user.role,
   };
 };
-
-export { findUserByEmail, findUserById, createNewUser };
