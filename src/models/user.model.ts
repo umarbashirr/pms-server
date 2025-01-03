@@ -6,6 +6,7 @@ import { GlobalRoleEnum } from "../enums/global-role.enum";
 interface IUser extends Document {
   name: string;
   email: string;
+  phoneNumber: string;
   password: string;
   role: GlobalRoleEnum;
 }
@@ -26,6 +27,11 @@ const userSchema = new Schema<IUser, Model<IUser, IMethods>>(
       type: String,
       required: true,
       lowercase: true,
+    },
+    phoneNumber: {
+      type: String,
+      required: true,
+      trim: true,
     },
     password: {
       type: String,
