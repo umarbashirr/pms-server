@@ -1,0 +1,9 @@
+export enum PropertyRoleEnum {
+  "ADMIN" = "ADMIN",
+  "RECEPTION" = "RECEPTION",
+  "HOTEL_MANAGER" = "HOTEL_MANAGER",
+  "RESERVATION" = "RESERVATION",
+  "FB" = "FB",
+  "ACCOUNTS" = "ACCOUNTS",
+  "HOUSEKEEPING" = "HOUSEKEEPING",
+}
