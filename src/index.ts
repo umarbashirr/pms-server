@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-import express from "express";
+import express, { Express } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
@@ -9,9 +9,12 @@ import morgan from "morgan";
 // Custom Imports
 import connectToDB from "./config/db";
 
+// Routes Import Files
+import authRoutes from "./routes/auth.routes";
+
 // Initialize enviornment variables
 
-const app = express();
+const app: Express = express();
 const port = process.env.PORT || 5000;
 
 //  Middlewares
@@ -26,6 +29,9 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Routes
+app.use("/api/v1/auth", authRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello, TypeScript Node Express!");
