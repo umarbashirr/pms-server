@@ -1,7 +1,11 @@
 import { Request, Response } from "express";
 import { GlobalRoleEnum } from "../enums/global-role.enum";
 import { ApiResponse } from "../helpers/api-response";
-import { LoginSchema, RegisterSchema } from "../schemas/auth.schema";
+import {
+  LoginSchema,
+  RegisterSchema,
+  TeamRegisterSchema,
+} from "../schemas/auth.schema";
 import {
   createNewUser,
   findUserByEmail,
@@ -89,6 +93,47 @@ const USER_LOGIN = async (req: Request, res: Response) => {
     });
 
     res.status(200).json(ApiResponse("Logged In Successfully!", true, token));
+  } catch (error: any) {
+    console.log(error.message);
+    res.status(500).json(ApiResponse("Internal Server Error", false));
+  }
+};
+
+export const USER_REGISTRATION_INTERNAL = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    // validate the requested body object through zod validation
+    const fields = TeamRegisterSchema.safeParse(req.body);
+
+    if (!fields.success) {
+      res
+        .status(400)
+        .json(ApiResponse("Invalid provided details", false, null));
+      return;
+    }
+
+    const { name, email, phoneNumber, role, password } = fields.data;
+
+    // Check if user already exists if any throw error response
+    const existingUser = await findUserByEmail(email);
+
+    if (existingUser) {
+      res.status(409).json(ApiResponse("Email already in use!", false));
+      return;
+    }
+
+    // Create new user as REGULAR_USER global role
+    const user = await createNewUser({
+      name,
+      email,
+      phoneNumber,
+      password,
+      role,
+    });
+
+    res.status(200).json(ApiResponse("user created successfully!", true, user));
   } catch (error: any) {
     console.log(error.message);
     res.status(500).json(ApiResponse("Internal Server Error", false));
