@@ -28,6 +28,8 @@ interface ICompanyProfile extends Document {
     postalCode?: string;
   };
   notes?: string; // Additional notes
+  propertyRef: Schema.Types.ObjectId;
+  createdBy: Schema.Types.ObjectId;
 }
 
 type CompanyProfileModel = Model<ICompanyProfile, {}>;
@@ -85,6 +87,14 @@ const CompanyProfileSchema = new Schema<ICompanyProfile, CompanyProfileModel>(
     notes: {
       type: String,
       trim: true,
+    },
+    propertyRef: {
+      type: Schema.Types.ObjectId,
+      ref: "Property",
+    },
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
     },
   },
   {

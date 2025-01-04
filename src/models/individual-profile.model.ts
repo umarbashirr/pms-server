@@ -23,6 +23,8 @@ interface IIndividualProfile extends Document {
   };
   preferences?: string[]; // Optional preferences
   notes?: string; // Additional notes
+  propertyRef: Schema.Types.ObjectId;
+  createdBy: Schema.Types.ObjectId;
 }
 
 type IndividualProfileModel = Model<IIndividualProfile, {}>;
@@ -82,6 +84,14 @@ const IndividualProfileSchema = new Schema<
     notes: {
       type: String,
       trim: true,
+    },
+    propertyRef: {
+      type: Schema.Types.ObjectId,
+      ref: "Property",
+    },
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
     },
   },
   {
