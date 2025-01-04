@@ -2,8 +2,8 @@ import { Document, model, Model, Schema } from "mongoose";
 import { PropertyRoleEnum } from "../enums/user-role.enum";
 
 interface IUserProperty extends Document {
-  userId: Schema.Types.ObjectId;
-  propertyId: Schema.Types.ObjectId;
+  userRef: Schema.Types.ObjectId;
+  propertyRef: Schema.Types.ObjectId;
   role: PropertyRoleEnum;
 }
 
@@ -12,11 +12,11 @@ type UserPropertyModel = Model<IUserProperty, {}>;
 
 const userPropertySchema = new Schema<IUserProperty, UserPropertyModel>(
   {
-    userId: {
+    userRef: {
       type: Schema.Types.ObjectId,
       ref: "User",
     },
-    propertyId: {
+    propertyRef: {
       type: Schema.Types.ObjectId,
       ref: "Property",
     },

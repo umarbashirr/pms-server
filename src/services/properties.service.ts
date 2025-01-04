@@ -1,4 +1,5 @@
 import Property from "../models/property.model";
+import UserProperty from "../models/user-property.model";
 
 export const checkPropertyByNameAndEmail = async (
   name: string,

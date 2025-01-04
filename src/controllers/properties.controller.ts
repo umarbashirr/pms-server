@@ -7,7 +7,11 @@ import {
   createProperty,
   reverseProperty,
 } from "../services/properties.service";
-import { createUserProperty } from "../services/user-property.service";
+import {
+  createUserProperty,
+  getAllPropertiesByUserId,
+  getPropertyDetailsByUserId,
+} from "../services/user-property.service";
 import { PropertyRoleEnum } from "../enums/user-role.enum";
 
 export const CREATE_NEW_PROPERTY = async (
@@ -63,6 +67,46 @@ export const CREATE_NEW_PROPERTY = async (
     res
       .status(201)
       .json(ApiResponse("Property created successfully!", true, property));
+  } catch (error: any) {
+    console.log(error.message);
+    res.status(500).json(ApiResponse("Internal Server Error", false));
+  }
+};
+
+export const GET_ALL_PROPERTIES = async (req: CustomRequest, res: Response) => {
+  try {
+    const userId = req.userId;
+
+    const properties = await getAllPropertiesByUserId(userId);
+
+    if (!properties) {
+      res.status(200).json(ApiResponse("Fetched successfully", true, []));
+      return;
+    }
+
+    res.status(200).json(ApiResponse("Fetched successfully", true, properties));
+  } catch (error: any) {
+    console.log(error.message);
+    res.status(500).json(ApiResponse("Internal Server Error", false));
+  }
+};
+
+export const GET_PROPERTY_DETAILS_BY_USER_ID = async (
+  req: CustomRequest,
+  res: Response
+) => {
+  try {
+    const userId = req.userId;
+    const { propertyId } = req.params;
+
+    const property = await getPropertyDetailsByUserId(userId, propertyId);
+
+    if (!property) {
+      res.status(404).json(ApiResponse("Error while fetching..", false));
+      return;
+    }
+
+    res.status(200).json(ApiResponse("Fetched successfully", true, property));
   } catch (error: any) {
     console.log(error.message);
     res.status(500).json(ApiResponse("Internal Server Error", false));
