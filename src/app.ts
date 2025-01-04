@@ -7,6 +7,7 @@ import morgan from "morgan";
 // Routes Import Files
 import authRoutes from "./routes/auth.routes";
 import propertiesRoutes from "./routes/properties.routes";
+import roomTypeRoutes from "./routes/room-types.routes";
 
 // Initialize enviornment variables
 
@@ -28,6 +29,7 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use("/api/v1/pmsserver/auth", authRoutes);
 app.use("/api/v1/pmsserver/properties", propertiesRoutes);
+app.use("/api/v1/pmsserver/properties/:propertyId/room-types", roomTypeRoutes);
 
 // Health Check Route
 app.get("/", (req, res) => {
