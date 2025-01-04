@@ -1,10 +1,16 @@
 import { Response } from "express";
-import { CustomRequest } from "../interfaces/custom-request.interface";
+import { PropertyRoleEnum } from "../enums/user-role.enum";
 import { ApiResponse } from "../helpers/api-response";
-import { NewPropertyCreationSchema } from "../schemas/properties.schema";
+import { CustomRequest } from "../interfaces/custom-request.interface";
+import {
+  NewPropertyCreationSchema,
+  propertyZodSchema,
+} from "../schemas/properties.schema";
 import {
   checkPropertyByNameAndEmail,
   createProperty,
+  getAllProperties,
+  getSinglePropertyById,
   reverseProperty,
 } from "../services/properties.service";
 import {
@@ -12,7 +18,8 @@ import {
   getAllPropertiesByUserId,
   getPropertyDetailsByUserId,
 } from "../services/user-property.service";
-import { PropertyRoleEnum } from "../enums/user-role.enum";
+import { GlobalRoleEnum } from "../enums/global-role.enum";
+import Property from "../models/property.model";
 
 export const CREATE_NEW_PROPERTY = async (
   req: CustomRequest,
@@ -75,9 +82,15 @@ export const CREATE_NEW_PROPERTY = async (
 
 export const GET_ALL_PROPERTIES = async (req: CustomRequest, res: Response) => {
   try {
-    const userId = req.userId;
+    const { userId, role } = req;
 
-    const properties = await getAllPropertiesByUserId(userId);
+    let properties;
+
+    if (role === GlobalRoleEnum.BOT) {
+      properties = await getAllProperties();
+    } else {
+      properties = await getAllPropertiesByUserId(userId);
+    }
 
     if (!properties) {
       res.status(200).json(ApiResponse("Fetched successfully", true, []));
@@ -96,10 +109,16 @@ export const GET_PROPERTY_DETAILS_BY_USER_ID = async (
   res: Response
 ) => {
   try {
-    const userId = req.userId;
+    const { userId, role } = req;
     const { propertyId } = req.params;
 
-    const property = await getPropertyDetailsByUserId(userId, propertyId);
+    let property;
+
+    if (role === GlobalRoleEnum.BOT) {
+      property = await getSinglePropertyById(propertyId);
+    } else {
+      property = await getPropertyDetailsByUserId(userId, propertyId);
+    }
 
     if (!property) {
       res.status(404).json(ApiResponse("Error while fetching..", false));
@@ -107,6 +126,73 @@ export const GET_PROPERTY_DETAILS_BY_USER_ID = async (
     }
 
     res.status(200).json(ApiResponse("Fetched successfully", true, property));
+  } catch (error: any) {
+    console.log(error.message);
+    res.status(500).json(ApiResponse("Internal Server Error", false));
+  }
+};
+
+export const UPDATE_USER_PROPERTY = async (
+  req: CustomRequest,
+  res: Response
+) => {
+  try {
+    const { body, role, userId } = req;
+    const { propertyId } = req.params;
+
+    const userProperty = await getPropertyDetailsByUserId(userId, propertyId);
+
+    if (!userProperty) {
+      res.status(400).json(ApiResponse("No such property found!", false));
+      return;
+    }
+
+    const userPropertyRole = userProperty.role;
+
+    if (
+      role !== GlobalRoleEnum.BOT &&
+      role !== GlobalRoleEnum.SUPER_ADMIN &&
+      userPropertyRole !== PropertyRoleEnum.ADMIN
+    ) {
+      res
+        .status(401)
+        .json(
+          ApiResponse("You are not authorzied to complete this request!", false)
+        );
+      return;
+    }
+
+    const fields = propertyZodSchema.safeParse(body);
+
+    if (!fields.success) {
+      res.status(401).json(ApiResponse("Invalid fields data!", false));
+      return;
+    }
+
+    const updatedProperty = await Property.findOneAndUpdate(
+      { _id: propertyId },
+      {
+        ...fields.data,
+      },
+      { new: true }
+    );
+
+    if (!updatedProperty) {
+      res
+        .status(401)
+        .json(ApiResponse("Error while updating property details!", false));
+      return;
+    }
+
+    res
+      .status(200)
+      .json(
+        ApiResponse(
+          "Property details updated successfully!",
+          true,
+          updatedProperty
+        )
+      );
   } catch (error: any) {
     console.log(error.message);
     res.status(500).json(ApiResponse("Internal Server Error", false));

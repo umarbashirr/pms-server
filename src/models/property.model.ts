@@ -16,7 +16,7 @@ interface IProperty extends Document {
     pincode?: string;
   };
   checkInTime?: string;
-  checkoutTime?: string;
+  checkOutTime?: string;
   amenities?: string[];
   description?: string;
   policies: string[];
@@ -90,7 +90,7 @@ const propertySchema = new Schema<IProperty, PropertyModel>(
       type: String,
       trim: true,
     },
-    checkoutTime: {
+    checkOutTime: {
       type: String,
       trim: true,
     },

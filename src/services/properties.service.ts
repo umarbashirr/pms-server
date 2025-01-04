@@ -33,3 +33,19 @@ export const reverseProperty = async (id: string) => {
     _id: id,
   });
 };
+
+export const getAllProperties = async () => {
+  try {
+    return await Property.find({});
+  } catch (error) {
+    return null;
+  }
+};
+
+export const getSinglePropertyById = async (id: string) => {
+  try {
+    return await Property.findById(id);
+  } catch (error) {
+    return null;
+  }
+};

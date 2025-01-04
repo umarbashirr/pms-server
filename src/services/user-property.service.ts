@@ -32,7 +32,7 @@ export const getPropertyDetailsByUserId = async (
   propertyId: string
 ) => {
   try {
-    return await UserProperty.find({
+    return await UserProperty.findOne({
       userRef: userId,
       propertyRef: propertyId,
     })
