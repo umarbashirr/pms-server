@@ -33,6 +33,7 @@ const propertySchema = new Schema<IProperty, PropertyModel>(
     name: {
       type: String,
       required: true,
+      lowercase: true,
       trim: true,
     },
     email: {
@@ -47,11 +48,13 @@ const propertySchema = new Schema<IProperty, PropertyModel>(
     },
     websiteURL: {
       type: String,
+      lowercase: true,
       trim: true,
     },
     mapURL: {
       type: String,
       trim: true,
+      lowercase: true,
     },
     latitude: {
       type: String,

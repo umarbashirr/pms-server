@@ -11,6 +11,7 @@ import connectToDB from "./config/db";
 
 // Routes Import Files
 import authRoutes from "./routes/auth.routes";
+import propertiesRoutes from "./routes/properties.routes";
 
 // Initialize enviornment variables
 
@@ -31,8 +32,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
-app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/pmsserver/auth", authRoutes);
+app.use("/api/v1/pmsserver/properties", propertiesRoutes);
 
+// Health Check Route
 app.get("/", (req, res) => {
   res.send("Hello, TypeScript Node Express!");
 });
