@@ -40,12 +40,14 @@ const CompanyProfileSchema = new Schema<ICompanyProfile, CompanyProfileModel>(
       type: String,
       required: true,
       trim: true,
+      lowercase: true,
     },
     companyCode: {
       type: String,
       required: true,
       unique: true,
       trim: true,
+      lowercase: true,
     },
     contactEmail: {
       type: String,

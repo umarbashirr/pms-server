@@ -38,11 +38,13 @@ const IndividualProfileSchema = new Schema<
       type: String,
       required: true,
       trim: true,
+      lowercase: true,
     },
     lastName: {
       type: String,
       required: true,
       trim: true,
+      lowercase: true,
     },
     email: {
       type: String,
