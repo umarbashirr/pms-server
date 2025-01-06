@@ -4,8 +4,6 @@ export interface IReservation extends Document {
   propertyRef: Types.ObjectId;
   bookerRef: Types.ObjectId;
   bookerModel: "IndividualProfile" | "CompanyProfile";
-  checkInDate: Date;
-  checkOutDate: Date;
   isCancelled: boolean;
   licenses: Types.ObjectId[];
   paymentDetails: {
@@ -46,14 +44,7 @@ const ReservationSchema: Schema = new Schema(
       type: String,
       enum: ["IndividualProfile", "CompanyProfile"],
     },
-    checkInDate: {
-      type: Date,
-      required: true,
-    },
-    checkOutDate: {
-      type: Date,
-      required: true,
-    },
+
     reservationStatus: {
       type: Boolean,
       required: false,

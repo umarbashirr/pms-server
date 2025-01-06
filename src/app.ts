@@ -10,6 +10,7 @@ import propertiesRoutes from "./routes/properties.routes";
 import roomTypeRoutes from "./routes/room-types.routes";
 import roomRoutes from "./routes/room.routes";
 import profileRoutes from "./routes/profiles.routes";
+import occupanyRoutes from "./routes/occupancy.routes";
 
 // Initialize enviornment variables
 
@@ -34,6 +35,10 @@ app.use("/api/v1/pmsserver/properties", propertiesRoutes);
 app.use("/api/v1/pmsserver/properties/:propertyId/room-types", roomTypeRoutes);
 app.use("/api/v1/pmsserver/properties/:propertyId/rooms", roomRoutes);
 app.use("/api/v1/pmsserver/properties/:propertyId/profiles", profileRoutes);
+app.use(
+  "/api/v1/pmsserver/properties/:propertyId/check-availability",
+  occupanyRoutes
+);
 
 // Health Check Route
 app.get("/", (req, res) => {

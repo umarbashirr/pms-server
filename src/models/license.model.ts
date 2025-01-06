@@ -14,6 +14,8 @@ export interface ILicense extends Document {
   guestList: {
     guestRef: Types.ObjectId;
   }[];
+  checkInDate: Date;
+  checkOutDate: Date;
   charges: {
     baseRate: number;
     taxAmount: number;
@@ -60,6 +62,8 @@ const LicenseSchema: Schema = new Schema(
         },
       },
     ],
+    checkInDate: Date,
+    checkOutDate: Date,
     charges: {
       baseRate: { type: Number, required: true },
       taxAmount: { type: Number, required: true },
@@ -90,4 +94,6 @@ const LicenseSchema: Schema = new Schema(
   }
 );
 
-export default mongoose.model<ILicense>("License", LicenseSchema);
+const License = mongoose.model<ILicense>("License", LicenseSchema);
+
+export default License;
