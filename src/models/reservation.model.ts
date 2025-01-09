@@ -1,4 +1,8 @@
 import mongoose, { Schema, Document, Types } from "mongoose";
+import {
+  ReservationPayTypeEnum,
+  ReservationSourceEnum,
+} from "../enums/reservation.enum";
 
 export interface IReservation extends Document {
   propertyRef: Types.ObjectId;
@@ -27,9 +31,14 @@ export interface IReservation extends Document {
   updatedBy?: Types.ObjectId;
   createdAt?: Date;
   updatedAt?: Date;
+  bookingSource: ReservationSourceEnum;
+  payType: ReservationPayTypeEnum;
+  cancelledBy: Types.ObjectId;
+  isClosed: boolean;
+  payments: Types.ObjectId[];
 }
 
-const ReservationSchema: Schema = new Schema(
+const ReservationSchema: Schema = new Schema<IReservation>(
   {
     propertyRef: {
       type: Schema.Types.ObjectId,
@@ -102,6 +111,28 @@ const ReservationSchema: Schema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "User",
     },
+    bookingSource: {
+      type: String,
+      enum: Object.keys(ReservationSourceEnum),
+    },
+    payType: {
+      type: String,
+      enum: Object.keys(ReservationPayTypeEnum),
+    },
+    cancelledBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+    isClosed: {
+      type: Boolean,
+      default: false,
+    },
+    payments: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Payment",
+      },
+    ],
   },
   {
     timestamps: true,

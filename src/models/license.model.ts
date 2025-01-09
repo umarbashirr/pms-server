@@ -8,8 +8,8 @@ export interface ILicense extends Document {
   roomTypeRef: Types.ObjectId;
   roomRef?: Types.ObjectId;
   assignmentDetails?: {
-    assignedAt: Date;
-    assignedBy: Types.ObjectId;
+    assignedAt: Date | null;
+    assignedBy: Types.ObjectId | null;
   };
   guestList: {
     guestRef: Types.ObjectId;
@@ -22,13 +22,24 @@ export interface ILicense extends Document {
     discountAmount?: number;
     totalCharges: number;
   };
+  cancelledCharges: {
+    baseRate: number;
+    taxAmount: number;
+    totalCharges: number;
+  };
   licenseStatus: BOOKING_LICENSE_STATUS;
   notes?: string;
   createdBy: Types.ObjectId;
   updatedBy?: Types.ObjectId;
+  isCancelled: boolean;
+  actualCheckInTime: Date;
+  actualCheckOutDate: Date;
+  checkedInBy: Types.ObjectId;
+  checkedOutBy: Types.ObjectId;
+  cancelledBy: Types.ObjectId;
 }
 
-const LicenseSchema: Schema = new Schema(
+const LicenseSchema: Schema = new Schema<ILicense>(
   {
     reservationId: {
       type: Schema.Types.ObjectId,
@@ -48,10 +59,11 @@ const LicenseSchema: Schema = new Schema(
     roomRef: {
       type: Schema.Types.ObjectId,
       ref: "Room",
+      default: null,
     },
     assignmentDetails: {
-      assignedAt: { type: Date },
-      assignedBy: { type: Schema.Types.ObjectId, ref: "User" },
+      assignedAt: { type: Date, default: null },
+      assignedBy: { type: Schema.Types.ObjectId, ref: "User", default: null },
     },
     guestList: [
       {
@@ -69,11 +81,18 @@ const LicenseSchema: Schema = new Schema(
       discountAmount: { type: Number, default: 0 },
       totalCharges: { type: Number, required: true },
     },
+    cancelledCharges: {
+      baseRate: { type: Number },
+      taxAmount: { type: Number },
+      totalCharges: { type: Number },
+    },
     licenseStatus: {
       type: String,
       enum: Object.values(BOOKING_LICENSE_STATUS),
       default: BOOKING_LICENSE_STATUS.NOT_STARTED,
     },
+    actualCheckInTime: Date,
+    actualCheckOutDate: Date,
     notes: {
       type: String,
     },
@@ -83,6 +102,22 @@ const LicenseSchema: Schema = new Schema(
       required: true,
     },
     updatedBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+    isCancelled: {
+      type: Boolean,
+      default: false,
+    },
+    checkedInBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+    checkedOutBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+    cancelledBy: {
       type: Schema.Types.ObjectId,
       ref: "User",
     },

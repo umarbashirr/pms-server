@@ -12,6 +12,7 @@ import roomRoutes from "./routes/room.routes";
 import profileRoutes from "./routes/profiles.routes";
 import occupanyRoutes from "./routes/occupancy.routes";
 import reservationRoutes from "./routes/reservation.routes";
+import paymentRoutes from "./routes/payment.routes";
 
 // Initialize enviornment variables
 
@@ -43,6 +44,11 @@ app.use(
 app.use(
   "/api/v1/pmsserver/properties/:propertyId/reservation",
   reservationRoutes
+);
+
+app.use(
+  "/api/v1/pmsserver/properties/:propertyId/reservation/:reservationId/payments",
+  paymentRoutes
 );
 
 // Health Check Route

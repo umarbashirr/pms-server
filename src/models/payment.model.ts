@@ -3,7 +3,6 @@ import { PAYMENTENUM } from "../enums/payment.enum";
 
 export interface IPayment extends Document {
   reservationRef: Types.ObjectId;
-  licenseRef?: Types.ObjectId;
   propertyRef: Types.ObjectId;
   amountPaid: number;
   paymentMethod: PAYMENTENUM;
@@ -23,10 +22,6 @@ const PaymentSchema: Schema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Reservation",
       required: true,
-    },
-    licenseRef: {
-      type: Schema.Types.ObjectId,
-      ref: "License",
     },
     propertyRef: {
       type: Schema.Types.ObjectId,
@@ -73,4 +68,6 @@ const PaymentSchema: Schema = new Schema(
   }
 );
 
-export default mongoose.model<IPayment>("Payment", PaymentSchema);
+const Payment = mongoose.model<IPayment>("Payment", PaymentSchema);
+
+export default Payment;
