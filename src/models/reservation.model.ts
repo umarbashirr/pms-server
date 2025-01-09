@@ -11,6 +11,7 @@ export interface IReservation extends Document {
     totalPaid: number;
     balance: number;
   };
+  guestList: Types.ObjectId[];
   gstDetails?: {
     beneficiaryName: string;
     gstin: string;
@@ -45,9 +46,9 @@ const ReservationSchema: Schema = new Schema(
       enum: ["IndividualProfile", "CompanyProfile"],
     },
 
-    reservationStatus: {
+    isCancelled: {
       type: Boolean,
-      required: false,
+      default: false,
     },
     licenses: [
       {
@@ -55,15 +56,20 @@ const ReservationSchema: Schema = new Schema(
         ref: "License",
       },
     ],
+    guestList: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "IndividualProfile",
+        required: true,
+      },
+    ],
     paymentDetails: {
       totalAmount: {
         type: Number,
-        required: true,
         default: 0,
       },
       totalPaid: {
         type: Number,
-        required: true,
         default: 0,
       },
       balance: {
@@ -102,4 +108,9 @@ const ReservationSchema: Schema = new Schema(
   }
 );
 
-export default mongoose.model<IReservation>("Reservation", ReservationSchema);
+const Reservation = mongoose.model<IReservation>(
+  "Reservation",
+  ReservationSchema
+);
+
+export default Reservation;

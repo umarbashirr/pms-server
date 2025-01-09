@@ -9,6 +9,7 @@ export const GET_OCCUPANCY = async (req: CustomRequest, res: Response) => {
   try {
     const { query, params } = req;
 
+    // Checkin Date & Checkout Date MM/DD/YYYY
     const { checkInDate, checkOutDate } = query;
     const { propertyId } = params;
 

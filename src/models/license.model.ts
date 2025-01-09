@@ -58,7 +58,6 @@ const LicenseSchema: Schema = new Schema(
         guestRef: {
           type: Schema.Types.ObjectId,
           ref: "IndividualProfile",
-          required: true,
         },
       },
     ],
@@ -74,7 +73,6 @@ const LicenseSchema: Schema = new Schema(
       type: String,
       enum: Object.values(BOOKING_LICENSE_STATUS),
       default: BOOKING_LICENSE_STATUS.NOT_STARTED,
-      required: true,
     },
     notes: {
       type: String,
