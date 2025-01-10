@@ -9,6 +9,7 @@ import mongoose from "mongoose";
 import routes from "./routes";
 import { config } from "./config";
 import { swaggerUi, swaggerSpec } from "./swagger";
+import { errorHandler } from "./middlewares/error-handler.middleware";
 
 // Initialize enviornment variables
 
@@ -47,5 +48,7 @@ app.get("/health", async (req, res) => {
     res.status(500).json({ status: "DOWN", error: error.message });
   }
 });
+
+app.use(errorHandler);
 
 export default app;
