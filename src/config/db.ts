@@ -1,13 +1,8 @@
 import mongoose from "mongoose";
 
-const URI = process.env.MONGO_URI;
-const DBNAME = process.env.DB_NAME;
-
-const COMPLETE_URI = `${URI}/${DBNAME}`;
-
-const connectToDB = async (): Promise<void> => {
+const connectToDB = async (uri: string): Promise<void> => {
   try {
-    const conn = mongoose.connect(COMPLETE_URI);
+    const conn = mongoose.connect(uri);
 
     if (!conn) {
       throw new Error("Error while connecting to Database!");

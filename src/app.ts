@@ -3,16 +3,12 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import morgan from "morgan";
+import mongoose from "mongoose";
 
 // Routes Import Files
-import authRoutes from "./routes/auth.routes";
-import propertiesRoutes from "./routes/properties.routes";
-import roomTypeRoutes from "./routes/room-types.routes";
-import roomRoutes from "./routes/room.routes";
-import profileRoutes from "./routes/profiles.routes";
-import occupanyRoutes from "./routes/occupancy.routes";
-import reservationRoutes from "./routes/reservation.routes";
-import paymentRoutes from "./routes/payment.routes";
+import routes from "./routes";
+import { config } from "./config";
+import { swaggerUi, swaggerSpec } from "./swagger";
 
 // Initialize enviornment variables
 
@@ -23,7 +19,7 @@ app.use(morgan("combined"));
 app.use(helmet());
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: config.corsOrigin,
     credentials: true,
   })
 );
@@ -31,29 +27,25 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
-app.use("/api/v1/pmsserver/auth", authRoutes);
-app.use("/api/v1/pmsserver/properties", propertiesRoutes);
-app.use("/api/v1/pmsserver/properties/:propertyId/room-types", roomTypeRoutes);
-app.use("/api/v1/pmsserver/properties/:propertyId/rooms", roomRoutes);
-app.use("/api/v1/pmsserver/properties/:propertyId/profiles", profileRoutes);
-app.use(
-  "/api/v1/pmsserver/properties/:propertyId/check-availability",
-  occupanyRoutes
-);
-app.use(
-  "/api/v1/pmsserver/properties/:propertyId/reservation",
-  reservationRoutes
-);
+// Swagger API Documentation
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-app.use(
-  "/api/v1/pmsserver/properties/:propertyId/reservation/:reservationId/payments",
-  paymentRoutes
-);
+// Routes
+routes.forEach((route) => {
+  app.use(route.path, route.handler);
+});
 
 // Health Check Route
-app.get("/", (req, res) => {
-  res.send("Hello, TypeScript Node Express!");
+app.get("/health", async (req, res) => {
+  try {
+    const dbStatus = await mongoose.connection.readyState; // 1 for connected
+    res.json({
+      status: "UP",
+      database: dbStatus === 1 ? "Connected" : "Disconnected",
+    });
+  } catch (error: any) {
+    res.status(500).json({ status: "DOWN", error: error.message });
+  }
 });
 
 export default app;

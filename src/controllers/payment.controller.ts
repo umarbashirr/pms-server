@@ -32,6 +32,63 @@ import * as PaymentService from "../services/payment.service";
  * - `500`: Internal server errors or transaction failures.
  */
 
+/**
+ * @swagger
+ * /api/v1/pmsserver/properties/{propertyId}/reservation/{reservationId}/payments:
+ *   post:
+ *     summary: Add a new payment to a reservation
+ *     tags: [Payments]
+ *     parameters:
+ *       - in: path
+ *         name: propertyId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID of the property
+ *       - in: path
+ *         name: reservationId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID of the reservation
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               amountPaid:
+ *                 type: number
+ *                 description: Amount paid by the user
+ *               paymentMethod:
+ *                 type: string
+ *                 description: Method of payment (e.g., CREDIT_CARD)
+ *               referenceNumber:
+ *                 type: string
+ *                 description: Reference number for the payment
+ *               notes:
+ *                 type: string
+ *                 description: Additional notes
+ *     responses:
+ *       201:
+ *         description: Payment added successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Payment added successfully
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *       400:
+ *         description: Missing or invalid fields
+ *       500:
+ *         description: Internal server error
+ */
 export const ADD_PAYMENT = async (req: CustomRequest, res: Response) => {
   try {
     const userId = new mongoose.Types.ObjectId(req.userId);

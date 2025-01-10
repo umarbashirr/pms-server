@@ -1,14 +1,13 @@
 require("dotenv").config();
 
 import app from "./app";
+import { config } from "./config";
 import connectToDB from "./config/db";
 
-const port = process.env.PORT || 5000;
-
-connectToDB()
+connectToDB(`${config.dbUri}/${config.dbName}`)
   .then(() => {
-    app.listen(port, () => {
-      console.log(`Server is running on port ${port}`);
+    app.listen(config.port, () => {
+      console.log(`Server is running on port ${config.port}`);
     });
   })
   .catch((err) => {
