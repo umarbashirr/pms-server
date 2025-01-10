@@ -2,8 +2,7 @@ import { Response } from "express";
 import mongoose from "mongoose";
 import { ApiResponse } from "../helpers/api-response";
 import { CustomRequest } from "../interfaces/custom-request.interface";
-import Payment from "../models/payment.model";
-import Reservation from "../models/reservation.model";
+import * as PaymentService from "../services/payment.service";
 
 /**
  * ADD_PAYMENT
@@ -39,18 +38,14 @@ export const ADD_PAYMENT = async (req: CustomRequest, res: Response) => {
     const { propertyId, reservationId } = req.params;
     const { amountPaid, paymentMethod, referenceNumber, notes } = req.body;
 
-    if (!propertyId) {
-      res.status(400).json(ApiResponse("Property ID is missing", false));
-      return;
-    }
-
-    if (!reservationId) {
-      res.status(400).json(ApiResponse("Reservation ID is missing", false));
-      return;
-    }
-
-    if (!amountPaid || !paymentMethod || !referenceNumber) {
-      res.status(400).json(ApiResponse("Invalid fields", false));
+    if (
+      !propertyId ||
+      !reservationId ||
+      !amountPaid ||
+      !paymentMethod ||
+      !referenceNumber
+    ) {
+      res.status(400).json(ApiResponse("Missing required fields", false));
       return;
     }
 
@@ -58,29 +53,21 @@ export const ADD_PAYMENT = async (req: CustomRequest, res: Response) => {
     session.startTransaction();
 
     try {
-      const payment = await Payment.create(
-        [
-          {
-            reservationRef: reservationId,
-            propertyRef: propertyId,
-            amountPaid,
-            paymentMethod,
-            referenceNumber,
-            notes,
-            createdBy: userId,
-          },
-        ],
-        { session }
-      );
-
-      await Reservation.findByIdAndUpdate(
+      const payment = await PaymentService.addPayment(
+        session,
+        propertyId,
         reservationId,
-        { $push: { payments: payment[0]._id } },
-        { session }
+        amountPaid,
+        paymentMethod,
+        referenceNumber,
+        notes,
+        userId
       );
 
       await session.commitTransaction();
-      res.status(201).json(ApiResponse("Payment added successfully", true));
+      res
+        .status(201)
+        .json(ApiResponse("Payment added successfully", true, payment));
     } catch (error) {
       await session.abortTransaction();
       res.status(500).json(ApiResponse("Failed to add payment", false));
@@ -126,40 +113,26 @@ export const UPDATE_PAYMENT = async (req: CustomRequest, res: Response) => {
     const { propertyId, reservationId, paymentId } = req.params;
     const { amountPaid, paymentMethod, referenceNumber, notes } = req.body;
 
-    if (!propertyId) {
-      res.status(400).json(ApiResponse("Property ID is missing", false));
+    if (
+      !propertyId ||
+      !reservationId ||
+      !amountPaid ||
+      !paymentMethod ||
+      !referenceNumber
+    ) {
+      res.status(400).json(ApiResponse("Missing required fields", false));
       return;
     }
 
-    if (!reservationId) {
-      res.status(400).json(ApiResponse("Reservation ID is missing", false));
-      return;
-    }
-
-    if (!amountPaid || !paymentMethod || !referenceNumber) {
-      res.status(400).json(ApiResponse("Invalid fields", false));
-      return;
-    }
-
-    const payment = await Payment.findOneAndUpdate(
-      {
-        reservationRef: reservationId,
-        _id: paymentId,
-        propertyRef: propertyId,
-        isVoid: false,
-      },
-      {
-        $set: {
-          amountPaid,
-          paymentMethod,
-          referenceNumber,
-          notes,
-          updatedBy: userId,
-        },
-      },
-      {
-        new: true,
-      }
+    const payment = await PaymentService.updatePayment(
+      propertyId,
+      reservationId,
+      paymentId,
+      amountPaid,
+      paymentMethod,
+      referenceNumber,
+      notes,
+      userId
     );
 
     if (!payment) {
@@ -168,7 +141,9 @@ export const UPDATE_PAYMENT = async (req: CustomRequest, res: Response) => {
         .json(ApiResponse("Payment not found or cannot be updated", false));
     }
 
-    res.status(200).json(ApiResponse("Payment updated successfully", true));
+    res
+      .status(200)
+      .json(ApiResponse("Payment updated successfully", true, payment));
   } catch (error: any) {
     console.error(error.message);
     res.status(500).json(ApiResponse("Internal Server Error", false));
@@ -207,33 +182,16 @@ export const CANCEL_PAYMENT = async (req: CustomRequest, res: Response) => {
     const userId = new mongoose.Types.ObjectId(req.userId);
     const { propertyId, reservationId, paymentId } = req.params;
 
-    if (!propertyId) {
-      res.status(400).json(ApiResponse("Property ID is missing", false));
+    if (!propertyId || !reservationId || !paymentId) {
+      res.status(400).json(ApiResponse("Missing required fields", false));
       return;
     }
 
-    if (!reservationId) {
-      res.status(400).json(ApiResponse("Reservation ID is missing", false));
-      return;
-    }
-
-    const payment = await Payment.findOneAndUpdate(
-      {
-        reservationRef: reservationId,
-        _id: paymentId,
-        propertyRef: propertyId,
-        isVoid: false,
-      },
-      {
-        $set: {
-          isVoid: true,
-          updatedBy: userId,
-        },
-      },
-
-      {
-        new: true,
-      }
+    const payment = await PaymentService.cancelPayment(
+      propertyId,
+      reservationId,
+      paymentId,
+      userId
     );
 
     if (!payment) {
@@ -242,7 +200,9 @@ export const CANCEL_PAYMENT = async (req: CustomRequest, res: Response) => {
         .json(ApiResponse("Payment not found or already voided", false));
     }
 
-    res.status(200).json(ApiResponse("Payment voided successfully", true));
+    res
+      .status(200)
+      .json(ApiResponse("Payment voided successfully", true, payment));
   } catch (error: any) {
     console.error(error.message);
     res.status(500).json(ApiResponse("Internal Server Error", false));
