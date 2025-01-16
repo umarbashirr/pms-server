@@ -17,7 +17,8 @@ interface IProperty extends Document {
   };
   checkInTime?: string;
   checkOutTime?: string;
-  amenities?: string[];
+  timeZone?: string;
+  currency?: string;
   description?: string;
   policies: string[];
   images: string[];
@@ -86,6 +87,12 @@ const propertySchema = new Schema<IProperty, PropertyModel>(
         trim: true,
       },
     },
+    timeZone: {
+      type: String,
+    },
+    currency: {
+      type: String,
+    },
     checkInTime: {
       type: String,
       trim: true,
@@ -94,10 +101,7 @@ const propertySchema = new Schema<IProperty, PropertyModel>(
       type: String,
       trim: true,
     },
-    amenities: {
-      type: [String], // List of amenities like "Free WiFi", "Swimming Pool"
-      default: [],
-    },
+
     description: {
       type: String,
       trim: true,

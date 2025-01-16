@@ -14,32 +14,36 @@ export const VerifyUserAdminAccess = async (
     const { userId, role } = req;
     const { propertyId } = req.params;
 
-    console.log(userId, propertyId);
+    if (role === GlobalRoleEnum.BOT) {
+      next();
+    } else {
+      const userProperty = await UserProperty.findOne({
+        propertyRef: propertyId,
+        userRef: userId,
+      });
 
-    const userProperty = await UserProperty.findOne({
-      propertyRef: propertyId,
-      userRef: userId,
-    });
+      if (!userProperty) {
+        res.status(401).json(ApiResponse("Un-authorized", false));
+        return;
+      }
 
-    if (!userProperty) {
-      res.status(401).json(ApiResponse("Un-authorized", false));
-      return;
+      if (
+        role !== GlobalRoleEnum.SUPER_ADMIN &&
+        userProperty.role !== PropertyRoleEnum.ADMIN
+      ) {
+        res
+          .status(401)
+          .json(
+            ApiResponse(
+              "You are not authorzied to complete this request!",
+              false
+            )
+          );
+        return;
+      }
+
+      next();
     }
-
-    if (
-      role !== GlobalRoleEnum.BOT &&
-      role !== GlobalRoleEnum.SUPER_ADMIN &&
-      userProperty.role !== PropertyRoleEnum.ADMIN
-    ) {
-      res
-        .status(401)
-        .json(
-          ApiResponse("You are not authorzied to complete this request!", false)
-        );
-      return;
-    }
-
-    next();
   } catch (error) {
     res.status(500).json(ApiResponse("Internal Server Error", false));
   }

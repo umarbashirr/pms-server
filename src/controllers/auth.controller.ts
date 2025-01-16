@@ -12,6 +12,8 @@ import {
   findUserByEmailWithPassword,
 } from "../services/user.service";
 import { AccessCookieEnum } from "../enums/cookie.enum";
+import { CustomRequest } from "../interfaces/custom-request.interface";
+import User from "../models/user.model";
 
 const USER_REGISTRATION = async (
   req: Request,
@@ -69,7 +71,9 @@ const USER_LOGIN = async (req: Request, res: Response) => {
     const { email, password } = fields.data;
 
     // Check if user already exists if not exists throw error response
-    const existingUser = await findUserByEmailWithPassword(email);
+    const existingUser = await User.findOne({
+      email,
+    }).select("+password");
 
     if (!existingUser) {
       res.status(404).json(ApiResponse("No user found!", false));
@@ -92,7 +96,17 @@ const USER_LOGIN = async (req: Request, res: Response) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.status(200).json(ApiResponse("Logged In Successfully!", true, token));
+    res.status(200).json(
+      ApiResponse("Logged In Successfully!", true, {
+        token,
+        user: {
+          _id: existingUser?._id,
+          name: existingUser?.name,
+          email: existingUser?.email,
+          role: existingUser?.role,
+        },
+      })
+    );
   } catch (error: any) {
     console.log(error.message);
     res.status(500).json(ApiResponse("Internal Server Error", false));
@@ -134,6 +148,39 @@ export const USER_REGISTRATION_INTERNAL = async (
     });
 
     res.status(200).json(ApiResponse("user created successfully!", true, user));
+  } catch (error: any) {
+    console.log(error.message);
+    res.status(500).json(ApiResponse("Internal Server Error", false));
+  }
+};
+
+export const VALIDATE_USER = async (req: CustomRequest, res: Response) => {
+  try {
+    const { userId, role } = req;
+
+    res.status(200).json(
+      ApiResponse("validated", true, {
+        _id: userId,
+        role: role,
+      })
+    );
+  } catch (error: any) {
+    console.error(error.message);
+    res.status(500).json(ApiResponse("Internal Server Error", false));
+    return;
+  }
+};
+
+export const USER_LOGOUT = async (req: Request, res: Response) => {
+  try {
+    // Clear the authentication cookie
+    res.clearCookie(AccessCookieEnum.NAME, {
+      secure: true,
+      httpOnly: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production",
+    });
+
+    res.status(200).json(ApiResponse("Logged Out Successfully!", true));
   } catch (error: any) {
     console.log(error.message);
     res.status(500).json(ApiResponse("Internal Server Error", false));

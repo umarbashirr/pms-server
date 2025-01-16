@@ -36,7 +36,7 @@ export const reverseProperty = async (id: string) => {
 
 export const getAllProperties = async () => {
   try {
-    return await Property.find({});
+    return await UserProperty.find({}).populate("propertyRef userRef");
   } catch (error) {
     return null;
   }

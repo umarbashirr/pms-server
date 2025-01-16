@@ -72,7 +72,8 @@ export const propertyZodSchema = z.object({
       (val) => !val || /^([01]\d|2[0-3]):([0-5]\d)$/.test(val),
       "Checkout time must be in HH:mm format"
     ),
-  amenities: z.array(z.string()).optional(),
+  timeZone: z.string().optional(),
+  currency: z.string().optional(),
   description: z.string().optional(),
   policies: z.array(z.string()).default([]),
   images: z.array(z.string().url("Each image URL must be valid")).default([]),

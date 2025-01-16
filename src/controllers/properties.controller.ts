@@ -20,6 +20,7 @@ import {
 } from "../services/user-property.service";
 import { GlobalRoleEnum } from "../enums/global-role.enum";
 import Property from "../models/property.model";
+import UserProperty from "../models/user-property.model";
 
 export const CREATE_NEW_PROPERTY = async (
   req: CustomRequest,
@@ -139,8 +140,16 @@ export const UPDATE_USER_PROPERTY = async (
   try {
     const { body, role, userId } = req;
     const { propertyId } = req.params;
-
-    const userProperty = await getPropertyDetailsByUserId(userId, propertyId);
+    let userProperty;
+    if (role === GlobalRoleEnum.BOT) {
+      userProperty = await UserProperty.findOne({
+        propertyRef: propertyId,
+      })
+        .select("propertyRef role -_id")
+        .populate("propertyRef");
+    } else {
+      userProperty = await getPropertyDetailsByUserId(userId, propertyId);
+    }
 
     if (!userProperty) {
       res.status(400).json(ApiResponse("No such property found!", false));
@@ -172,7 +181,9 @@ export const UPDATE_USER_PROPERTY = async (
     const updatedProperty = await Property.findOneAndUpdate(
       { _id: propertyId },
       {
-        ...fields.data,
+        $set: {
+          ...fields.data,
+        },
       },
       { new: true }
     );
