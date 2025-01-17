@@ -1,7 +1,12 @@
 import { Response } from "express";
+import { GlobalRoleEnum } from "../enums/global-role.enum";
 import { PropertyRoleEnum } from "../enums/user-role.enum";
 import { ApiResponse } from "../helpers/api-response";
 import { CustomRequest } from "../interfaces/custom-request.interface";
+import Property from "../models/property.model";
+import UserProperty from "../models/user-property.model";
+import User from "../models/user.model";
+import { RegisterToPropertySchema } from "../schemas/auth.schema";
 import {
   NewPropertyCreationSchema,
   propertyZodSchema,
@@ -18,9 +23,7 @@ import {
   getAllPropertiesByUserId,
   getPropertyDetailsByUserId,
 } from "../services/user-property.service";
-import { GlobalRoleEnum } from "../enums/global-role.enum";
-import Property from "../models/property.model";
-import UserProperty from "../models/user-property.model";
+import mongoose from "mongoose";
 
 export const CREATE_NEW_PROPERTY = async (
   req: CustomRequest,
@@ -206,6 +209,65 @@ export const UPDATE_USER_PROPERTY = async (
       );
   } catch (error: any) {
     console.log(error.message);
+    res.status(500).json(ApiResponse("Internal Server Error", false));
+  }
+};
+
+export const AddUserToProperty = async (req: CustomRequest, res: Response) => {
+  try {
+    const { body, params } = req;
+
+    const { propertyId } = params;
+    const fields = RegisterToPropertySchema.safeParse(body);
+
+    if (!fields.success) {
+      res.status(400).json(ApiResponse("Missing or invalid input", false));
+      return;
+    }
+
+    const { name, email, password, phoneNumber, role } = fields.data;
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res
+        .status(400)
+        .json(ApiResponse("Email is already registered", false));
+    }
+
+    const user = await User.create({
+      name,
+      email,
+      phoneNumber,
+      password,
+    });
+
+    const userProperty = await UserProperty.create({
+      role,
+      propertyRef: propertyId,
+      userRef: user._id,
+    });
+
+    res.status(201).json(ApiResponse("Access Given", true));
+  } catch (error: any) {
+    console.log(error.message);
+    res.status(500).json(ApiResponse("Internal Server Error", false));
+  }
+};
+
+export const GetUsersByProperty = async (req: CustomRequest, res: Response) => {
+  try {
+    const { propertyId } = req.params;
+
+    const users = await UserProperty.find({ propertyRef: propertyId }).populate(
+      "userRef",
+      "name email phoneNumber role"
+    );
+
+    res
+      .status(200)
+      .json(ApiResponse("Users fetched successfully!", true, users));
+  } catch (error: any) {
+    console.error(error.message);
     res.status(500).json(ApiResponse("Internal Server Error", false));
   }
 };

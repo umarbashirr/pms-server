@@ -171,6 +171,22 @@ export const VALIDATE_USER = async (req: CustomRequest, res: Response) => {
   }
 };
 
+export const HasAdminRights = async (req: CustomRequest, res: Response) => {
+  try {
+    const { userId, role } = req;
+
+    res.status(200).json(
+      ApiResponse("validated", true, {
+        _id: userId,
+        role: role,
+      })
+    );
+  } catch (error: any) {
+    console.error(error.message);
+    res.status(500).json(ApiResponse("Internal Server Error", false));
+  }
+};
+
 export const USER_LOGOUT = async (req: Request, res: Response) => {
   try {
     // Clear the authentication cookie

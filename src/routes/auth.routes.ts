@@ -1,5 +1,6 @@
 import { RequestHandler, Router } from "express";
 import {
+  HasAdminRights,
   USER_LOGIN,
   USER_LOGOUT,
   USER_REGISTRATION,
@@ -9,6 +10,7 @@ import {
 import { CustomRequest } from "../interfaces/custom-request.interface";
 import verifyAccessToken from "../middlewares/verify-token.middleware";
 import { VerifyUserRole } from "../middlewares/verify-user-role.middleware";
+import { VerifyUserAdminAccess } from "../middlewares/verify-admin-access.middleware";
 
 const router = Router();
 
@@ -22,5 +24,11 @@ router.use(VerifyUserRole as unknown as RequestHandler<CustomRequest>);
 router
   .route("/validate")
   .get(VALIDATE_USER as unknown as RequestHandler<CustomRequest>);
+
+router.use(VerifyUserAdminAccess as unknown as RequestHandler<CustomRequest>);
+router.get(
+  "/check-auth",
+  HasAdminRights as unknown as RequestHandler<CustomRequest>
+);
 
 export default router;
